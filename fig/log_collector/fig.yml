@@ -1,0 +1,57 @@
+elasticsearch:
+  build: ../../containers/elasticsearch
+  ports:
+    - '9300:9300'
+  volumes:
+    - setting/elasticsearch/elasticsearch.yml:/data/elasticsearch.yml:ro
+    - data/elasticsearch/data:/data/data
+    - data/elasticsearch/work:/data/work
+    - log/elasticsearch:/data/log
+    - setting/elasticsearch-supervisord:/etc/supervisor/conf.d:ro
+    - log/elasticsearch-supervisord:/var/log/supervisor
+    - setting/elasticsearch/crontab:/setting/crond/crontab:ro
+
+kibana:
+  build: ../../containers/kibana
+  links:
+    - elasticsearch:elasticsearch
+  volumes:
+    - setting/kibana/kibana.yml:/kibana/config/kibana.yml:ro
+
+fluentd:
+  build: ../../containers/fluentd
+  ports:
+    - '24224:24224'
+  links:
+    - norikra:norikra
+    - elasticsearch:elasticsearch
+  volumes:
+    - setting/fluentd:/fluentd/conf
+    - log/fluentd:/fluentd/log
+    - setting/fluentd-supervisord:/etc/supervisor/conf.d:ro
+    - log/fluentd-supervisord:/var/log/supervisor
+    - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+  command: fluentd --use-v1-config -c /fluentd/conf/fluentd.conf
+
+nginx:
+  build: ../../containers/nginx
+  ports:
+    - '5601:5601'
+    - '9200:9200'
+    - '26578:26578'
+  volumes:
+    - setting/nginx/htpasswd:/data/htpasswd:ro
+    - setting/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+    - log/nginx:/var/log/nginx
+  links:
+    - elasticsearch
+    - kibana
+    - norikra
+
+norikra:
+  build: ../../containers/norikra
+  volumes:
+    - data/norikra:/norikra/data
+    - log/norikra:/norikra/log
+  command: norikra start --stats=/norikra/data/norikra.stats.json --dump-stat-interval=60 --gc-log=/norikra/log/gc.log -javaagent:/usr/local/lib/jolokia-jvm-agent.jar=port=8778,host=0.0.0.0

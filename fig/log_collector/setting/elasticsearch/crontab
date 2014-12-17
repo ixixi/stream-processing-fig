@@ -1,0 +1,6 @@
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+* * * * * PREFIX="docker-"; DAY=9; INDEX=`date +$PREFIX\%Y.\%m.\%d --date "${DAY} days ago"`; curl -XDELETE -w'\n' "http://localhost:9200/${INDEX}"
+* * * * * PREFIX="norikra-"; DAY=9; INDEX=`date +$PREFIX\%Y.\%m.\%d --date "${DAY} days ago"`; curl -XDELETE -w'\n' "http://localhost:9200/${INDEX}"
+* * * * * PREFIX="twitter-"; DAY=9; INDEX=`date +$PREFIX\%Y.\%m.\%d --date "${DAY} days ago"`; curl -XDELETE -w'\n' "http://localhost:9200/${INDEX}"
