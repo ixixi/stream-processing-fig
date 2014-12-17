@@ -15,6 +15,8 @@ dockerとfigを使って、norikra、elasticsearch, kibana4, Basic認証用のng
 
 ## コマンド
 ```bash
+cd fig/log_collector
+
 # 起動
 fig up
 
